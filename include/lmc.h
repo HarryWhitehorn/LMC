@@ -51,7 +51,7 @@ private:
     void hlt(std::string errorMsg);
 
 public:
-    bool isDebug = true;
+    bool isDebug = false;
 
     int fetch();
     void decode(int v);

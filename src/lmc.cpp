@@ -234,24 +234,23 @@ void Lmc::printStatus()
 // TODO
 // - Compile from Assembly to dec.2
 // - Add saving to file
-// - Create TUI using ncurses.
-// - Refactor (h file)
+// - Create UI using qt.
 // - Comment
 // - readme.md
 // - publish
 
-int main()
-{
-    cout << "START" << endl;
-    Lmc l;
-    l.isDebug = false; // TODO
-    // l._setMemory();
-    // l.printMemory();
-    // l.save();
-    l.load();
-    l.printStatus();
-    l.main();
-    // cout << zfill(21) << endl;
-    cout << "END" << endl;
-    return 0;
-};
+// int main()
+// {
+//     cout << "START" << endl;
+//     Lmc l;
+//     l.isDebug = true; // TODO
+//     // l._setMemory();
+//     // l.printMemory();
+//     // l.save();
+//     l.load();
+//     l.printStatus();
+//     l.main();
+//     // cout << zfill(21) << endl;
+//     cout << "END" << endl;
+//     return 0;
+// };
