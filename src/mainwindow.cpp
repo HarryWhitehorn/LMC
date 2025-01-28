@@ -1,8 +1,11 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(Lmc *l, QWidget *parent)
     : QMainWindow(parent)
 {
+    lmc = l;
+    l->setOuput(this);
+    l->setInput(this);
     setupUi();
 }
 
@@ -23,6 +26,8 @@ void MainWindow::setupUi()
     setupMemory();
     // Output
     setupOutput();
+    // MenuBar
+    setupMenu();
     //
     setCentralWidget(centralWidget);
 }
@@ -74,6 +79,8 @@ void MainWindow::setupRegisters()
     inputButton = new QPushButton(centralWidget);
     inputButton->setObjectName("inputButton");
     inputButton->setText("Enter");
+    connect(inputButton, &QPushButton::clicked, this, &MainWindow::onEnterClicked);
+    inputButton->setEnabled(false);
     registersGrid->addWidget(inputButton, 4, 1, 1, 1);
 }
 
@@ -91,7 +98,7 @@ void MainWindow::populateMemoryGrid()
     for (int i = 0; i < std::size(memoryLCDs); ++i)
     {
         memoryLCDs[i] = new QLCDNumber(centralWidget);
-        memoryLCDs[i]->setObjectName("lcdM"+std::to_string(i));
+        memoryLCDs[i]->setObjectName("lcdM" + std::to_string(i));
         memoryLCDs[i]->setSmallDecimalPoint(false);
         memoryLCDs[i]->setDigitCount(3);
         memoryLCDs[i]->setSegmentStyle(QLCDNumber::SegmentStyle::Filled);
@@ -119,6 +126,29 @@ void MainWindow::setupOutput()
     outputScrollBar = new QScrollBar(centralWidget);
     outputScrollBar->setObjectName("outputScrollBar");
     outputGrid->addWidget(outputScrollBar, 1, 1, 1, 1);
+}
+
+void MainWindow::setupMenu()
+{
+    menuBar = new QMenuBar(centralWidget);
+    menuBar->setObjectName("menuBar");
+    setMenuBar(menuBar);
+    //
+    controlMenu = new QMenu("&Control", centralWidget);
+    controlMenu->setObjectName("controlMenu");
+    menuBar->addMenu(controlMenu);
+    //
+    runAction = new QAction("Run", centralWidget);
+    controlMenu->addAction(runAction);
+    connect(runAction, &QAction::triggered, this, &MainWindow::onRunTriggered);
+    //
+    stepAction = new QAction("Step", centralWidget);
+    controlMenu->addAction(stepAction);
+    connect(stepAction, &QAction::triggered, this, &MainWindow::onStepTriggered);
+    //
+    resetAction = new QAction("Reset", centralWidget);
+    controlMenu->addAction(resetAction);
+    connect(resetAction, &QAction::triggered, this, &MainWindow::onResetTriggered);
 }
 
 void MainWindow::setPc(int n)
@@ -152,4 +182,84 @@ void MainWindow::setMemory(std::array<int, 100> m)
     {
         setMemory(m[i], i);
     }
+}
+
+void MainWindow::setIsRunning(bool isRunning)
+{
+    stepAction->setEnabled(isRunning);
+}
+
+void MainWindow::updateValues()
+{
+    setPc(lmc->getPc());
+    setAcc(lmc->getAcc());
+    setIr(lmc->getIr());
+    setAr(lmc->getAr());
+    setMemory(lmc->getMemory());
+    setIsRunning(lmc->getIsRunning());
+}
+
+int MainWindow::read()
+{
+    inputButton->setEnabled(true);
+    stepAction->setEnabled(false);
+    QEventLoop loop;
+    connect(inputButton, &QPushButton::clicked, &loop, &QEventLoop::quit);
+    loop.exec();
+    inputButton->setEnabled(false);
+    stepAction->setEnabled(true);
+    int value = inputSpinBox->value();
+    return value;
+}
+
+void MainWindow::write(std::string value)
+{
+    QString v = QString::fromStdString(value);
+    outputTextEdit->appendPlainText(v);
+}
+
+void MainWindow::write(int value)
+{
+    QString v = QString::number(value);
+    outputTextEdit->appendPlainText(v);
+}
+
+void MainWindow::write(char value)
+{
+    QString v = QString(value);
+    outputTextEdit->appendPlainText(v);
+}
+
+void MainWindow::onRunTriggered()
+{
+    while (lmc->getIsRunning())
+    {
+        lmc->step();
+        updateValues();
+        // TODO: Sleep delay
+    }
+}
+
+void MainWindow::onStepTriggered()
+{
+    lmc->step();
+    updateValues();
+}
+
+void MainWindow::onResetTriggered()
+{
+    lmc->reset();
+    updateValues();
+}
+
+void MainWindow::onEnterClicked()
+{
+    QString v = QString::number(inputSpinBox->value()); // TODO: give to lmc via InputDevice;
+    // outputTextEdit->appendPlainText(v);
+    // TODO
+    // Create UI AbstractIO
+    // Take input from spinbox
+    // Disable enter button when no input needed
+    // Async?
+    // Output to text box
 }

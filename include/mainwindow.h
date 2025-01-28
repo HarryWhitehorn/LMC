@@ -10,13 +10,21 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QScrollBar>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMenu>
+#include <QAction>
+#include <QMessageBox>
 #include <array>
+#include "lmc.h"
+#include "abstractio.h"
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, InputDevice, OutputDevice
 {
     Q_OBJECT
 
 public:
+    Lmc *lmc;
+    // UI
     QWidget *centralWidget;
     QGridLayout *gridLayout;
     // Registers
@@ -33,14 +41,20 @@ public:
     QLCDNumber *arLCD;
     // Memory
     QGridLayout *memoryGrid;
-    std::array<QLCDNumber *, 100> memoryLCDs; // LCDs created on init
+    std::array<QLCDNumber*, 100> memoryLCDs; // LCDs created on init
     // Output
     QGridLayout *outputGrid;
     QLabel *outputLabel;
     QPlainTextEdit *outputTextEdit;
     QScrollBar *outputScrollBar;
+    // Menu
+    QMenuBar *menuBar;
+    QMenu *controlMenu;
+    QAction *runAction;
+    QAction *stepAction;
+    QAction *resetAction;
 
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(Lmc *l, QWidget *parent = nullptr);
     ~MainWindow();
 
     void setPc(int n);
@@ -49,6 +63,21 @@ public:
     void setAr(int n);
     void setMemory(int n, int i);
     void setMemory(std::array<int, 100> m);
+    void setIsRunning(bool isRunning);
+    void updateValues();
+    // InputDevice
+    int read() override;
+    // OutputDevice
+    void write(std::string value) override;
+    void write(int value) override;
+    void write(char value) override;
+
+
+private slots:
+    void onRunTriggered();
+    void onStepTriggered();
+    void onResetTriggered();
+    void onEnterClicked();
 
 private:
     void setupUi();
@@ -56,5 +85,6 @@ private:
     void setupMemory();
     void populateMemoryGrid();
     void setupOutput();
+    void setupMenu();
 };
 #endif // MAINWINDOW_H

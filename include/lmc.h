@@ -5,10 +5,10 @@
 #include <array>
 #include <vector>
 #include <string>
-#include <iostream>
+#include "abstractio.h"
 
 const int MEMORY_SIZE = 100;
-const std::string FILEPATH = "../programs/ascii_table.lmc";
+const std::string FILEPATH = "c:\\Users\\harry\\Documents\\GitHub\\LMC\\programs\\ascii.lmc";
 
 enum Opcode
 {
@@ -35,6 +35,8 @@ private:
     int ir = 0;  // Instruction Register
     int ar = 0;  // Address Register
     int acc = 0; // Accumulator
+    InputDevice *inputDevice;
+    OutputDevice *outputDevice;
     bool isRunning = true;
 
     void add();
@@ -53,19 +55,32 @@ private:
 public:
     bool isDebug = false;
 
+    Lmc(InputDevice *input, OutputDevice *output, bool debug = false);
+    // Lmc(bool debug = false);
+    ~Lmc();
+
     int fetch();
     void decode(int v);
     void execute();
     void step();
     void main();
     void reset();
-    std::array<int, MEMORY_SIZE> getMemory();
     void setMemory(std::vector<int> m);
     void printMemory();
-    void save();
-    void load();
+    void save(std::string path=FILEPATH);
+    void load(std::string path=FILEPATH);
     void printRegistries();
     void printStatus();
+
+    int getPc();
+    int getAcc();
+    int getIr();
+    int getAr();
+    std::array<int, MEMORY_SIZE> getMemory();
+    bool getIsRunning();
+
+    void setInput(InputDevice *input);
+    void setOuput(OutputDevice *output);
 };
 
 #endif // LMC_H
