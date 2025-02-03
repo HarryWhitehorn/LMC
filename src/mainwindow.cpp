@@ -6,6 +6,8 @@ MainWindow::MainWindow(Lmc *l, QWidget *parent)
     lmc = l;
     l->setOuput(this);
     l->setInput(this);
+    settingsWindow = new SettingsWindow(this);
+    connect(settingsWindow, &SettingsWindow::clearOutput, this, &MainWindow::onClearOutputTriggered);
     setupUi();
 }
 
@@ -101,8 +103,9 @@ void MainWindow::populateMemoryGrid()
         memoryLCDs[i]->setObjectName("lcdM" + std::to_string(i));
         memoryLCDs[i]->setSmallDecimalPoint(false);
         memoryLCDs[i]->setDigitCount(3);
-        memoryLCDs[i]->setSegmentStyle(QLCDNumber::SegmentStyle::Filled);
+        memoryLCDs[i]->setSegmentStyle(QLCDNumber::SegmentStyle::Flat);
         memoryLCDs[i]->setProperty("value", QVariant(i));
+        memoryLCDs[i]->setAutoFillBackground(true);
         memoryGrid->addWidget(memoryLCDs[i], i / 10, i % 10, 1, 1);
     }
 }
@@ -122,10 +125,6 @@ void MainWindow::setupOutput()
     outputTextEdit->setObjectName("outputTextEdit");
     outputTextEdit->setReadOnly(true);
     outputGrid->addWidget(outputTextEdit, 1, 0, 1, 1);
-    //
-    outputScrollBar = new QScrollBar(centralWidget);
-    outputScrollBar->setObjectName("outputScrollBar");
-    outputGrid->addWidget(outputScrollBar, 1, 1, 1, 1);
 }
 
 void MainWindow::setupMenu()
@@ -133,27 +132,71 @@ void MainWindow::setupMenu()
     menuBar = new QMenuBar(centralWidget);
     menuBar->setObjectName("menuBar");
     setMenuBar(menuBar);
-    //
+    // fileMenu
+    fileMenu = new QMenu("&File", centralWidget);
+    fileMenu->setObjectName("fileMenu");
+    menuBar->addMenu(fileMenu);
+    //   Open
+    openAction = new QAction("Open", centralWidget);
+    openAction->setObjectName("openAction");
+    fileMenu->addAction(openAction);
+    connect(openAction, &QAction::triggered, this, &MainWindow::onOpenTriggered);
+    //   Save
+    saveAction = new QAction("Save", centralWidget);
+    saveAction->setObjectName("saveAction");
+    fileMenu->addAction(saveAction);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::onSaveTriggered);
+    //   Exit
+    fileMenu->addSeparator();
+    exitAction = new QAction("Exit", centralWidget);
+    exitAction->setObjectName("exitAction");
+    fileMenu->addAction(exitAction);
+    connect(exitAction, &QAction::triggered, this, &MainWindow::onExitTriggered);
+    // controlMenu
     controlMenu = new QMenu("&Control", centralWidget);
     controlMenu->setObjectName("controlMenu");
     menuBar->addMenu(controlMenu);
-    //
+    //   Run
     runAction = new QAction("Run", centralWidget);
     controlMenu->addAction(runAction);
     connect(runAction, &QAction::triggered, this, &MainWindow::onRunTriggered);
-    //
+    //   Stop
+    stopAction = new QAction("Stop", centralWidget);
+    controlMenu->addAction(stopAction);
+    connect(stopAction, &QAction::triggered, this, &MainWindow::onStopTriggered);
+    //   Step
     stepAction = new QAction("Step", centralWidget);
     controlMenu->addAction(stepAction);
     connect(stepAction, &QAction::triggered, this, &MainWindow::onStepTriggered);
-    //
+    //   Reset
+    controlMenu->addSeparator();
     resetAction = new QAction("Reset", centralWidget);
     controlMenu->addAction(resetAction);
     connect(resetAction, &QAction::triggered, this, &MainWindow::onResetTriggered);
+    // helpMenu
+    helpMenu = new QMenu("&Help", centralWidget);
+    helpMenu->setObjectName("helpMenu");
+    menuBar->addMenu(helpMenu);
+    //   Settings
+    settingsAction = new QAction("Settings", centralWidget);
+    helpMenu->addAction(settingsAction);
+    connect(settingsAction, &QAction::triggered, this, &MainWindow::onSettingsTriggered);
+    //   About
+    helpMenu->addSeparator();
+    aboutAction = new QAction("About", centralWidget);
+    helpMenu->addAction(aboutAction);
+    connect(aboutAction, &QAction::triggered, this, &MainWindow::onAboutTriggered);
+}
+
+void MainWindow::clearOutput()
+{
+    outputTextEdit->clear();
 }
 
 void MainWindow::setPc(int n)
 {
     pcLCD->display(n);
+    memoryLCDs[n]->setPalette(settingsWindow->getPcHighlight());
 }
 
 void MainWindow::setAcc(int n)
@@ -169,11 +212,16 @@ void MainWindow::setIr(int n)
 void MainWindow::setAr(int n)
 {
     arLCD->display(n);
+    if (lmc->getIr() != IO)
+    { // Not IO
+        memoryLCDs[n]->setPalette(settingsWindow->getArHighlight());
+    }
 }
 
 void MainWindow::setMemory(int n, int i)
 {
     memoryLCDs[i]->display(n);
+    memoryLCDs[i]->setPalette(settingsWindow->defaultPalette);
 }
 
 void MainWindow::setMemory(std::array<int, 100> m)
@@ -191,11 +239,11 @@ void MainWindow::setIsRunning(bool isRunning)
 
 void MainWindow::updateValues()
 {
-    setPc(lmc->getPc());
+    setMemory(lmc->getMemory()); // First to clear all highlights
     setAcc(lmc->getAcc());
     setIr(lmc->getIr());
     setAr(lmc->getAr());
-    setMemory(lmc->getMemory());
+    setPc(lmc->getPc()); // Last to show pc highlight on top
     setIsRunning(lmc->getIsRunning());
 }
 
@@ -215,29 +263,69 @@ int MainWindow::read()
 void MainWindow::write(std::string value)
 {
     QString v = QString::fromStdString(value);
-    outputTextEdit->appendPlainText(v);
+    write(v);
 }
 
 void MainWindow::write(int value)
 {
     QString v = QString::number(value);
-    outputTextEdit->appendPlainText(v);
+    write(v);
 }
 
 void MainWindow::write(char value)
 {
     QString v = QString(value);
-    outputTextEdit->appendPlainText(v);
+    write(v);
+}
+
+void MainWindow::write(QString value)
+{
+    value.append(settingsWindow->getOutputText());
+    outputTextEdit->insertPlainText(value);
+}
+
+void MainWindow::delay(int msecs)
+{
+    // https://stackoverflow.com/a/11487434/
+    QTime delayTime = QTime::currentTime().addMSecs(msecs);
+    while (QTime::currentTime() < delayTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
+
+void MainWindow::onOpenTriggered()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "Open File", QCoreApplication::applicationDirPath(), "LMC (compiled) (*.lmc)");
+    if (!filename.isEmpty())
+    {
+        lmc->load(filename.toStdString());
+        updateValues();
+    }
+}
+
+void MainWindow::onSaveTriggered()
+{
+    // TODO
+}
+
+void MainWindow::onExitTriggered()
+{
+    QCoreApplication::quit();
 }
 
 void MainWindow::onRunTriggered()
 {
+    lmc->setIsRunning(true);
     while (lmc->getIsRunning())
     {
         lmc->step();
         updateValues();
-        // TODO: Sleep delay
+        delay(settingsWindow->getDelay());
     }
+}
+
+void MainWindow::onStopTriggered()
+{
+    lmc->setIsRunning(false);
 }
 
 void MainWindow::onStepTriggered()
@@ -249,17 +337,43 @@ void MainWindow::onStepTriggered()
 void MainWindow::onResetTriggered()
 {
     lmc->reset();
+    if (settingsWindow->getIsAutoClear())
+    {
+        clearOutput();
+    }
     updateValues();
 }
 
 void MainWindow::onEnterClicked()
 {
     QString v = QString::number(inputSpinBox->value()); // TODO: give to lmc via InputDevice;
-    // outputTextEdit->appendPlainText(v);
+    // TODO: Write/fix this function; Enter is handled in eventloop (not here)
+}
+
+void MainWindow::onSettingsTriggered()
+{
+    settingsWindow->show();
+}
+
+void MainWindow::onAboutTriggered()
+{
     // TODO
-    // Create UI AbstractIO
-    // Take input from spinbox
-    // Disable enter button when no input needed
-    // Async?
-    // Output to text box
+}
+
+void MainWindow::onClearOutputTriggered()
+{
+    clearOutput();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (lmc->getIsRunning())
+    {
+        lmc->setIsRunning(false);
+        while (lmc->getIsRunning())
+        {
+            event->ignore();
+        }
+        event->accept();
+    }
 }

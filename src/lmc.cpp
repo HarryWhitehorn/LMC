@@ -155,6 +155,7 @@ void Lmc::step()
 
 void Lmc::main()
 {
+    isRunning = true;
     while (isRunning)
     {
         if (isDebug)
@@ -273,6 +274,11 @@ int Lmc::getAr()
 bool Lmc::getIsRunning()
 {
     return isRunning;
+}
+
+void Lmc::setIsRunning(bool running)
+{
+    isRunning = running;
 }
 
 void Lmc::setInput(InputDevice *input)

@@ -14,9 +14,11 @@
 #include <QtWidgets/QMenu>
 #include <QAction>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <array>
 #include "lmc.h"
 #include "abstractio.h"
+#include "settingswindow.h"
 
 class MainWindow : public QMainWindow, InputDevice, OutputDevice
 {
@@ -46,13 +48,24 @@ public:
     QGridLayout *outputGrid;
     QLabel *outputLabel;
     QPlainTextEdit *outputTextEdit;
-    QScrollBar *outputScrollBar;
     // Menu
     QMenuBar *menuBar;
+        // FileMenu
+    QMenu *fileMenu;
+    QAction *openAction;
+    QAction *saveAction;
+    QAction *exitAction; 
+        // ControlMenu
     QMenu *controlMenu;
     QAction *runAction;
+    QAction *stopAction;
     QAction *stepAction;
     QAction *resetAction;
+        // HelpMenu
+    QMenu *helpMenu;
+    QAction *settingsAction;
+    SettingsWindow *settingsWindow;
+    QAction *aboutAction;
 
     MainWindow(Lmc *l, QWidget *parent = nullptr);
     ~MainWindow();
@@ -71,13 +84,25 @@ public:
     void write(std::string value) override;
     void write(int value) override;
     void write(char value) override;
+    void write(QString value);
 
+    void delay(int msecs=DELAY_TIME);
 
 private slots:
+    void onOpenTriggered();
+    void onSaveTriggered();
+    void onExitTriggered();
     void onRunTriggered();
+    void onStopTriggered();
     void onStepTriggered();
     void onResetTriggered();
     void onEnterClicked();
+    void onSettingsTriggered();
+    void onAboutTriggered();
+    //
+    void onClearOutputTriggered();
+    // Misc
+    void closeEvent(QCloseEvent *event) override;
 
 private:
     void setupUi();
@@ -86,5 +111,6 @@ private:
     void populateMemoryGrid();
     void setupOutput();
     void setupMenu();
+    void clearOutput();
 };
 #endif // MAINWINDOW_H

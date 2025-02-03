@@ -5,8 +5,8 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
 
-set(SOURCES src/main.cpp src/mainwindow.cpp src/lmc.cpp src/utils.cpp src/consoleio.cpp)
-set(HEADERS include/mainwindow.h include/lmc.h include/utils.h include/abstractio.h)
+set(SOURCES src/main.cpp src/mainwindow.cpp src/lmc.cpp src/utils.cpp src/consoleio.cpp src/settingswindow.cpp)
+set(HEADERS include/mainwindow.h include/lmc.h include/utils.h include/abstractio.h include/settingswindow.h)
 
 qt_add_executable(lmc
     WIN32 MACOSX_BUNDLE

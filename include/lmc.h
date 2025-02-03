@@ -37,7 +37,7 @@ private:
     int acc = 0; // Accumulator
     InputDevice *inputDevice;
     OutputDevice *outputDevice;
-    bool isRunning = true;
+    bool isRunning = false;
 
     void add();
     void sub();
@@ -78,6 +78,7 @@ public:
     int getAr();
     std::array<int, MEMORY_SIZE> getMemory();
     bool getIsRunning();
+    void setIsRunning(bool runnning);
 
     void setInput(InputDevice *input);
     void setOuput(OutputDevice *output);
