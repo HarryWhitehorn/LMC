@@ -8,6 +8,7 @@ MainWindow::MainWindow(Lmc *l, QWidget *parent)
     l->setInput(this);
     settingsWindow = new SettingsWindow(this);
     connect(settingsWindow, &SettingsWindow::clearOutput, this, &MainWindow::onClearOutputTriggered);
+    aboutWindow = new AboutWindow(this);
     setupUi();
 }
 
@@ -43,44 +44,55 @@ void MainWindow::setupRegisters()
     pcLabel = new QLabel(centralWidget);
     pcLabel->setObjectName("pcLabel");
     pcLabel->setText("PC");
+    pcLabel->setToolTip("Program Counter");
     registersGrid->addWidget(pcLabel, 0, 0, 1, 1);
     pcLCD = new QLCDNumber(centralWidget);
     pcLCD->setObjectName("pcLCD");
+    pcLCD->setToolTip("Program Counter");
     registersGrid->addWidget(pcLCD, 0, 1, 1, 1);
     //
     accLabel = new QLabel(centralWidget);
     accLabel->setObjectName("accLabel");
     accLabel->setText("Acc");
+    accLabel->setToolTip("Accumulator");
     registersGrid->addWidget(accLabel, 1, 0, 1, 1);
     accLCD = new QLCDNumber(centralWidget);
     accLCD->setObjectName("accLCD");
+    accLCD->setToolTip("Accumulator");
     registersGrid->addWidget(accLCD, 1, 1, 1, 1);
     //
     irLabel = new QLabel(centralWidget);
     irLabel->setObjectName("irLabel");
     irLabel->setText("IR");
+    irLabel->setToolTip("Instruction Register");
     registersGrid->addWidget(irLabel, 2, 0, 1, 1);
     irLCD = new QLCDNumber(centralWidget);
     irLCD->setObjectName("irLCD");
+    irLCD->setToolTip("Instruction Register");
     registersGrid->addWidget(irLCD, 2, 1, 1, 1);
     //
     arLabel = new QLabel(centralWidget);
     arLabel->setObjectName("arLabel");
     arLabel->setText("AR");
+    arLabel->setToolTip("Address Register");
     registersGrid->addWidget(arLabel, 3, 0, 1, 1);
     arLCD = new QLCDNumber(centralWidget);
     arLCD->setObjectName("arLCD");
+    arLCD->setToolTip("Address Register");
     registersGrid->addWidget(arLCD, 3, 1, 1, 1);
     //
     inputSpinBox = new QSpinBox(centralWidget);
     inputSpinBox->setObjectName("inputSpinBox");
     inputSpinBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
     inputSpinBox->setMaximum(999);
+    inputSpinBox->setMinimum(-999);
+    inputSpinBox->setToolTip("Input Value");
     registersGrid->addWidget(inputSpinBox, 4, 0, 1, 1);
     //
     inputButton = new QPushButton(centralWidget);
     inputButton->setObjectName("inputButton");
     inputButton->setText("Enter");
+    inputButton->setToolTip("Enter Input");
     connect(inputButton, &QPushButton::clicked, this, &MainWindow::onEnterClicked);
     inputButton->setEnabled(false);
     registersGrid->addWidget(inputButton, 4, 1, 1, 1);
@@ -106,6 +118,7 @@ void MainWindow::populateMemoryGrid()
         memoryLCDs[i]->setSegmentStyle(QLCDNumber::SegmentStyle::Flat);
         memoryLCDs[i]->setProperty("value", QVariant(i));
         memoryLCDs[i]->setAutoFillBackground(true);
+        memoryLCDs[i]->setToolTip("Memory Address " + QString::number(i));
         memoryGrid->addWidget(memoryLCDs[i], i / 10, i % 10, 1, 1);
     }
 }
@@ -357,7 +370,7 @@ void MainWindow::onSettingsTriggered()
 
 void MainWindow::onAboutTriggered()
 {
-    // TODO
+    aboutWindow->show();
 }
 
 void MainWindow::onClearOutputTriggered()

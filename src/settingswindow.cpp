@@ -5,7 +5,6 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     // window
     setParent(parent);
     setWindowTitle("Settings");
-    resize(400, 300);
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
     setAttribute(Qt::WA_QuitOnClose);
     // ui

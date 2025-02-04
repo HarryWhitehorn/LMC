@@ -19,6 +19,7 @@
 #include "lmc.h"
 #include "abstractio.h"
 #include "settingswindow.h"
+#include "aboutwindow.h"
 
 class MainWindow : public QMainWindow, InputDevice, OutputDevice
 {
@@ -66,6 +67,7 @@ public:
     QAction *settingsAction;
     SettingsWindow *settingsWindow;
     QAction *aboutAction;
+    AboutWindow *aboutWindow;
 
     MainWindow(Lmc *l, QWidget *parent = nullptr);
     ~MainWindow();
