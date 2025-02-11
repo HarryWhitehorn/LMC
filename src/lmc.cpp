@@ -3,8 +3,9 @@
 #include <vector>
 #include "lmc.h"
 #include "utils.h"
+#include "consoleio.cpp"
 
-using namespace std;
+// using namespace std;
 
 void Lmc::add()
 {
@@ -40,30 +41,46 @@ void Lmc::brp()
         pc = ar;
     }
 }
+
 void Lmc::inp()
 {
     // take user input and store in acc
-    cin >> acc;
+    // cin >> acc;
+    acc = inputDevice->read();
 }
 void Lmc::out()
 {
     // print acc
-    cout << acc << endl;
+    // cout << acc << endl;
+    outputDevice->write(acc);
 }
 void Lmc::otc()
 {
     // print acc as ascii
-    cout << (char)acc << endl;
+    // cout << (char)acc << endl;
+    outputDevice->write(char(acc));
 }
 void Lmc::hlt()
 {
     isRunning = false;
 }
-void Lmc::hlt(string errorMsg)
+void Lmc::hlt(std::string errorMsg)
 {
-    cout << errorMsg << endl; // TODO: int codes?
+    // cout << errorMsg << endl; // TODO: int codes?
+    outputDevice->write(errorMsg);
     hlt();
 }
+
+Lmc::Lmc(InputDevice *input, OutputDevice *output, bool debug) : inputDevice(input), outputDevice(output), isDebug(debug)
+{
+}
+
+// Lmc::Lmc(bool debug)
+// {
+
+// }
+
+Lmc::~Lmc() {}
 
 int Lmc::fetch()
 {
@@ -116,7 +133,7 @@ void Lmc::execute()
             otc();
             break;
         default:
-            cout << "Unknown instruction: " << ir << ". With address: " << ar << endl;
+            // cout << "Unknown instruction: " << ir << ". With address: " << ar << endl;
             break;
         }
         break;
@@ -124,7 +141,7 @@ void Lmc::execute()
         hlt();
         break;
     default:
-        cout << "unknown instruction: " << ir << endl;
+        // cout << "unknown instruction: " << ir << endl;
         break;
     }
 }
@@ -138,11 +155,12 @@ void Lmc::step()
 
 void Lmc::main()
 {
+    isRunning = true;
     while (isRunning)
     {
         if (isDebug)
         {
-            cout << endl;
+            // cout << endl;
             printStatus();
         }
         step();
@@ -151,19 +169,20 @@ void Lmc::main()
 
 void Lmc::reset()
 {
-    fill(begin(memory), end(memory), 0);
+    std::fill(begin(memory), end(memory), 0);
     acc = 0;
     pc = 0;
     ir = 0;
     ar = 0;
+    isRunning = true;
 }
 
-array<int, 100> Lmc::getMemory()
+std::array<int, 100> Lmc::getMemory()
 {
     return memory;
 }
 
-void Lmc::setMemory(vector<int> m)
+void Lmc::setMemory(std::vector<int> m)
 {
     for (int i = 0; i < size(m); ++i)
     {
@@ -177,28 +196,28 @@ void Lmc::printMemory()
     {
         if (i % 10 == 0 && i != 0)
         {
-            cout << endl;
+            // cout << endl;
         }
-        cout << zfill(memory[i]) << ", ";
+        // cout << zfill(memory[i]) << ", ";
     }
-    cout << endl;
+    // cout << endl;
 }
 
-void Lmc::save()
+void Lmc::save(std::string path)
 {
-    ofstream file(FILEPATH);
+    std::ofstream file(path);
     file.close();
 }
 
-void Lmc::load()
+void Lmc::load(std::string path)
 {
-    ifstream file(FILEPATH);
+    std::ifstream file(path);
     if (isDebug)
     {
-        cout << "Loading from " << FILEPATH << endl;
+        // cout << "Loading from " << FILEPATH << endl;
     }
-    string fileBuffer;
-    vector<int> m;
+    std::string fileBuffer;
+    std::vector<int> m;
     int i = 0;
     while (getline(file, fileBuffer))
     {
@@ -208,21 +227,22 @@ void Lmc::load()
             m.push_back(buffer);
             i++;
         }
-        catch (const invalid_argument &ia)
+        catch (const std::invalid_argument &ia)
         {
             if (isDebug)
             {
-                cout << "Skipping line: " << fileBuffer << endl;
+                // cout << "Skipping line: " << fileBuffer << endl;
             }
         }
     }
     file.close();
+    reset();
     setMemory(m);
 }
 
 void Lmc::printRegistries()
 {
-    cout << "PC: " << pc << ". IR: " << ir << ". AR: " << ar << ". ACC: " << acc << "." << endl;
+    // cout << "PC: " << pc << ". IR: " << ir << ". AR: " << ar << ". ACC: " << acc << "." << endl;
 }
 
 void Lmc::printStatus()
@@ -231,27 +251,68 @@ void Lmc::printStatus()
     printMemory();
 }
 
+int Lmc::getPc()
+{
+    return pc;
+}
+
+int Lmc::getAcc()
+{
+    return acc;
+}
+
+int Lmc::getIr()
+{
+    return ir;
+}
+
+int Lmc::getAr()
+{
+    return ar;
+}
+
+bool Lmc::getIsRunning()
+{
+    return isRunning;
+}
+
+void Lmc::setIsRunning(bool running)
+{
+    isRunning = running;
+}
+
+void Lmc::setInput(InputDevice *input)
+{
+    inputDevice = input;
+}
+
+void Lmc::setOuput(OutputDevice *output)
+{
+    outputDevice = output;
+}
+
 // TODO
 // - Compile from Assembly to dec.2
 // - Add saving to file
-// - Create TUI using ncurses.
-// - Refactor (h file)
+// - Create UI using qt.
 // - Comment
 // - readme.md
 // - publish
 
-int main()
-{
-    cout << "START" << endl;
-    Lmc l;
-    l.isDebug = false; // TODO
-    // l._setMemory();
-    // l.printMemory();
-    // l.save();
-    l.load();
-    l.printStatus();
-    l.main();
-    // cout << zfill(21) << endl;
-    cout << "END" << endl;
-    return 0;
-};
+// int main()
+// {
+//     // cout << "START" << endl;
+//     InputDevice *in = new ConsoleInput();
+//     OutputDevice *out = new ConsoleOutput();
+//     Lmc l(in, out);
+//     l.isDebug = true; // TODO
+//     // l._setMemory();
+//     // l.printMemory();
+//     // l.save();
+//     l.load();
+//     l.printStatus();
+//     l.main();
+//     // cout << zfill(21) << endl;
+//     // cout << "END" << endl;
+//     return 0;
+// };

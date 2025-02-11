@@ -32,7 +32,8 @@
 *.app
 
 # build
-/build
+/build*/
 
 # vscode
 /.vscode
+/temp
