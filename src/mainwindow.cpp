@@ -92,6 +92,8 @@ void MainWindow::setupRegisters()
     registersGrid->addWidget(inputSpinBox, 4, 0, 1, 1);
     //
     inputButton = new QPushButton(centralWidget);
+    inputButton->setDefault(true);
+    inputButton->setAutoDefault(true);
     inputButton->setObjectName("inputButton");
     inputButton->setText("Enter");
     inputButton->setToolTip("Enter Input");
@@ -153,7 +155,7 @@ void MainWindow::setupMenu()
     menuBar->addMenu(fileMenu);
     //   Open
     fileMenu->addSeparator();
-    openAction = new QAction("Open", centralWidget);
+    openAction = new QAction("&Open", centralWidget);
     openAction->setObjectName("openAction");
     fileMenu->addAction(openAction);
     connect(openAction, &QAction::triggered, this, &MainWindow::onOpenTriggered);
@@ -164,7 +166,7 @@ void MainWindow::setupMenu()
     // connect(saveAction, &QAction::triggered, this, &MainWindow::onSaveTriggered);
     //   Exit
     fileMenu->addSeparator();
-    exitAction = new QAction("Exit", centralWidget);
+    exitAction = new QAction("E&xit", centralWidget);
     exitAction->setObjectName("exitAction");
     fileMenu->addAction(exitAction);
     connect(exitAction, &QAction::triggered, this, &MainWindow::onExitTriggered);
@@ -173,35 +175,35 @@ void MainWindow::setupMenu()
     controlMenu->setObjectName("controlMenu");
     menuBar->addMenu(controlMenu);
     //   Run
-    runAction = new QAction("Run", centralWidget);
+    runAction = new QAction("Ru&n", centralWidget);
     controlMenu->addAction(runAction);
     connect(runAction, &QAction::triggered, this, &MainWindow::onRunTriggered);
     //   Stop
-    stopAction = new QAction("Stop", centralWidget);
+    stopAction = new QAction("&Stop", centralWidget);
     controlMenu->addAction(stopAction);
     connect(stopAction, &QAction::triggered, this, &MainWindow::onStopTriggered);
     //   Step
-    stepAction = new QAction("Step", centralWidget);
+    stepAction = new QAction("S&tep", centralWidget);
     controlMenu->addAction(stepAction);
     connect(stepAction, &QAction::triggered, this, &MainWindow::onStepTriggered);
     //   Reset
     controlMenu->addSeparator();
-    resetAction = new QAction("Reset", centralWidget);
+    resetAction = new QAction("&Reset", centralWidget);
     controlMenu->addAction(resetAction);
     connect(resetAction, &QAction::triggered, this, &MainWindow::onResetTriggered);
     // editorMenu
     editorMenu = new QMenu("&Editor", centralWidget);
     menuBar->addMenu(editorMenu);
     //  Editor
-    editorAction = new QAction("Editor", centralWidget);
+    editorAction = new QAction("&Editor", centralWidget);
     editorAction->setObjectName("editorAction");
     editorMenu->addAction(editorAction);
     connect(editorAction, &QAction::triggered, this, &MainWindow::onEditorTriggered);
     // settingsMenu
-    settingsMenu = new QMenu("Settings", centralWidget);
+    settingsMenu = new QMenu("&Settings", centralWidget);
     menuBar->addMenu(settingsMenu);
     //   Settings
-    settingsAction = new QAction("Settings", centralWidget);
+    settingsAction = new QAction("&Settings", centralWidget);
     settingsMenu->addAction(settingsAction);
     connect(settingsAction, &QAction::triggered, this, &MainWindow::onSettingsTriggered);
     // helpMenu
@@ -209,12 +211,12 @@ void MainWindow::setupMenu()
     helpMenu->setObjectName("helpMenu");
     menuBar->addMenu(helpMenu);
     //   Docs
-    docsAction = new QAction("Docs", centralWidget);
+    docsAction = new QAction("&Docs", centralWidget);
     helpMenu->addAction(docsAction);
     connect(docsAction, &QAction::triggered, this, &MainWindow::onDocsTriggered);
     //   About
     helpMenu->addSeparator();
-    aboutAction = new QAction("About", centralWidget);
+    aboutAction = new QAction("&About", centralWidget);
     helpMenu->addAction(aboutAction);
     connect(aboutAction, &QAction::triggered, this, &MainWindow::onAboutTriggered);
 }

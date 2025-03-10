@@ -5,7 +5,7 @@ EditorWindow::EditorWindow(QWidget *parent)
     // window
     setParent(parent);
     setWindowTitle("Editor");
-    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     setAttribute(Qt::WA_QuitOnClose);
     // ui
     resize(600, 600);
@@ -118,19 +118,19 @@ void EditorWindow::setupMenu()
     menuBar = new QMenuBar(centralWidget);
     setMenuBar(menuBar);
     // file
-    fileMenu = new QMenu("File", centralWidget);
+    fileMenu = new QMenu("&File", centralWidget);
     menuBar->addMenu(fileMenu);
     //  open
-    openAction = new QAction("Open", centralWidget);
+    openAction = new QAction("&Open", centralWidget);
     fileMenu->addAction(openAction);
     connect(openAction, &QAction::triggered, this, &EditorWindow::onOpenTriggered);
     //  save
-    saveAction = new QAction("Save", centralWidget);
+    saveAction = new QAction("&Save", centralWidget);
     fileMenu->addAction(saveAction);
     connect(saveAction, &QAction::triggered, this, &EditorWindow::onSaveTriggered);
     //  close
     fileMenu->addSeparator();
-    closeAction = new QAction("Close", centralWidget);
+    closeAction = new QAction("&Close", centralWidget);
     fileMenu->addAction(closeAction);
     connect(closeAction, &QAction::triggered, this, &EditorWindow::onCloseTriggered);
 }
@@ -138,8 +138,5 @@ void EditorWindow::setupMenu()
 void EditorWindow::onLoadClicked()
 {
     emit load();
+    hide();
 }
-
-// TODO
-// Add MenuBar
-// Add error handling via ui
