@@ -97,6 +97,11 @@ void EditorWindow::onCloseTriggered()
     this->hide();
 }
 
+void EditorWindow::onLoadTriggered()
+{
+    onLoadClicked();
+}
+
 void EditorWindow::setupUi()
 {
     centralWidget = new QWidget(this);
@@ -133,6 +138,13 @@ void EditorWindow::setupMenu()
     closeAction = new QAction("&Close", centralWidget);
     fileMenu->addAction(closeAction);
     connect(closeAction, &QAction::triggered, this, &EditorWindow::onCloseTriggered);
+    // load
+    loadMenu = new QMenu("&Load", centralWidget);
+    menuBar->addMenu(loadMenu);
+    //  load
+    loadAction = new QAction("&Load", centralWidget);
+    loadMenu->addAction(loadAction);
+    connect(loadAction, &QAction::triggered, this, &EditorWindow::onLoadTriggered);
 }
 
 void EditorWindow::onLoadClicked()

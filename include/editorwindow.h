@@ -34,6 +34,7 @@ private slots:
     void onOpenTriggered();
     void onSaveTriggered();
     void onCloseTriggered();
+    void onLoadTriggered();
 
 signals:
     void load();
@@ -50,6 +51,8 @@ private:
     QAction *openAction;
     QAction *saveAction;
     QAction *closeAction;
+    QMenu *loadMenu;
+    QAction *loadAction;
 
     void setupUi();
     void setupMenu();
