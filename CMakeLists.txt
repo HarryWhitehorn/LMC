@@ -5,8 +5,27 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
 
-set(SOURCES src/main.cpp src/mainwindow.cpp src/lmc.cpp src/utils.cpp src/consoleio.cpp src/settingswindow.cpp src/aboutwindow.cpp)
-set(HEADERS include/mainwindow.h include/lmc.h include/utils.h include/abstractio.h include/settingswindow.h include/aboutwindow.h)
+set(SOURCES 
+    src/main.cpp 
+    src/mainwindow.cpp 
+    src/lmc.cpp 
+    src/utils.cpp 
+    src/consoleio.cpp 
+    src/settingswindow.cpp 
+    src/aboutwindow.cpp
+    src/editorwindow.cpp
+    src/lmcHighlighter.cpp
+)
+
+set(HEADERS 
+    include/mainwindow.h 
+    include/lmc.h include/utils.h 
+    include/abstractio.h 
+    include/settingswindow.h 
+    include/aboutwindow.h
+    include/editorwindow.h
+    include/lmcHighlighter.h
+)
 
 qt_add_executable(lmc
     WIN32 MACOSX_BUNDLE
@@ -21,6 +40,18 @@ target_link_libraries(lmc
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)
+
+include(FetchContent)
+FetchContent_Declare(
+    lmc_compiler
+    GIT_REPOSITORY https://github.com/HarryWhitehorn/lmc-compiler.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(lmc_compiler)
+
+target_link_libraries(lmc PRIVATE lmc_compiler)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${lmc_compiler_SOURCE_DIR}/src)
 
 include(GNUInstallDirs)
 

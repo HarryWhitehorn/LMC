@@ -6,6 +6,8 @@ MainWindow::MainWindow(Lmc *l, QWidget *parent)
     lmc = l;
     l->setOuput(this);
     l->setInput(this);
+    editorWindow = new EditorWindow(this);
+    connect(editorWindow, &EditorWindow::load, this, &MainWindow::onEditorLoadTriggered);
     settingsWindow = new SettingsWindow(this);
     connect(settingsWindow, &SettingsWindow::clearOutput, this, &MainWindow::onClearOutputTriggered);
     aboutWindow = new AboutWindow(this);
@@ -150,15 +152,16 @@ void MainWindow::setupMenu()
     fileMenu->setObjectName("fileMenu");
     menuBar->addMenu(fileMenu);
     //   Open
+    fileMenu->addSeparator();
     openAction = new QAction("Open", centralWidget);
     openAction->setObjectName("openAction");
     fileMenu->addAction(openAction);
     connect(openAction, &QAction::triggered, this, &MainWindow::onOpenTriggered);
     //   Save
-    saveAction = new QAction("Save", centralWidget);
-    saveAction->setObjectName("saveAction");
-    fileMenu->addAction(saveAction);
-    connect(saveAction, &QAction::triggered, this, &MainWindow::onSaveTriggered);
+    // saveAction = new QAction("Save", centralWidget);
+    // saveAction->setObjectName("saveAction");
+    // fileMenu->addAction(saveAction);
+    // connect(saveAction, &QAction::triggered, this, &MainWindow::onSaveTriggered);
     //   Exit
     fileMenu->addSeparator();
     exitAction = new QAction("Exit", centralWidget);
@@ -186,14 +189,29 @@ void MainWindow::setupMenu()
     resetAction = new QAction("Reset", centralWidget);
     controlMenu->addAction(resetAction);
     connect(resetAction, &QAction::triggered, this, &MainWindow::onResetTriggered);
+    // editorMenu
+    editorMenu = new QMenu("&Editor", centralWidget);
+    menuBar->addMenu(editorMenu);
+    //  Editor
+    editorAction = new QAction("Editor", centralWidget);
+    editorAction->setObjectName("editorAction");
+    editorMenu->addAction(editorAction);
+    connect(editorAction, &QAction::triggered, this, &MainWindow::onEditorTriggered);
+    // settingsMenu
+    settingsMenu = new QMenu("Settings", centralWidget);
+    menuBar->addMenu(settingsMenu);
+    //   Settings
+    settingsAction = new QAction("Settings", centralWidget);
+    settingsMenu->addAction(settingsAction);
+    connect(settingsAction, &QAction::triggered, this, &MainWindow::onSettingsTriggered);
     // helpMenu
     helpMenu = new QMenu("&Help", centralWidget);
     helpMenu->setObjectName("helpMenu");
     menuBar->addMenu(helpMenu);
-    //   Settings
-    settingsAction = new QAction("Settings", centralWidget);
-    helpMenu->addAction(settingsAction);
-    connect(settingsAction, &QAction::triggered, this, &MainWindow::onSettingsTriggered);
+    //   Docs
+    docsAction = new QAction("Docs", centralWidget);
+    helpMenu->addAction(docsAction);
+    connect(docsAction, &QAction::triggered, this, &MainWindow::onDocsTriggered);
     //   About
     helpMenu->addSeparator();
     aboutAction = new QAction("About", centralWidget);
@@ -225,7 +243,7 @@ void MainWindow::setIr(int n)
 void MainWindow::setAr(int n)
 {
     arLCD->display(n);
-    if (lmc->getIr() != IO)
+    if (lmc->getIr() != OP_IO)
     { // Not IO
         memoryLCDs[n]->setPalette(settingsWindow->getArHighlight());
     }
@@ -295,6 +313,10 @@ void MainWindow::write(QString value)
 {
     value.append(settingsWindow->getOutputText());
     outputTextEdit->insertPlainText(value);
+    if (settingsWindow->getIsAutoscroll())
+    {
+        outputTextEdit->moveCursor(QTextCursor::End);
+    }
 }
 
 void MainWindow::delay(int msecs)
@@ -305,19 +327,35 @@ void MainWindow::delay(int msecs)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
 
+void MainWindow::onEditorTriggered()
+{
+    editorWindow->show();
+}
+
 void MainWindow::onOpenTriggered()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open File", QCoreApplication::applicationDirPath(), "LMC (compiled) (*.lmc)");
+    // TODO? error handling?
+    QString filename = QFileDialog::getOpenFileName(this, "Open File", QCoreApplication::applicationDirPath(), "LMC (compiled) (*.lmc);;LMC (plaintext) (*.txt)");
     if (!filename.isEmpty())
     {
-        lmc->load(filename.toStdString());
-        updateValues();
+        if (filename.endsWith(".lmc", Qt::CaseInsensitive))
+        {
+            lmc->load(filename.toStdString());
+            updateValues();
+        }
+        else if (filename.endsWith(".txt", Qt::CaseInsensitive))
+        {
+            editorWindow->setTextFromFile(filename.toStdString());
+            editorWindow->show();
+        }
     }
 }
 
 void MainWindow::onSaveTriggered()
 {
-    // TODO
+    // TODO write current memory into file
+    // or save 'state' and include register?
+    // would need custom loading of state
 }
 
 void MainWindow::onExitTriggered()
@@ -349,17 +387,12 @@ void MainWindow::onStepTriggered()
 
 void MainWindow::onResetTriggered()
 {
-    lmc->reset();
-    if (settingsWindow->getIsAutoClear())
-    {
-        clearOutput();
-    }
-    updateValues();
+    resetLmc();
 }
 
 void MainWindow::onEnterClicked()
 {
-    QString v = QString::number(inputSpinBox->value()); // TODO: give to lmc via InputDevice;
+    QString v = QString::number(inputSpinBox->value());
     // TODO: Write/fix this function; Enter is handled in eventloop (not here)
 }
 
@@ -368,9 +401,32 @@ void MainWindow::onSettingsTriggered()
     settingsWindow->show();
 }
 
+void MainWindow::onDocsTriggered()
+{
+    // TODO write docs
+}
+
 void MainWindow::onAboutTriggered()
 {
     aboutWindow->show();
+}
+
+void MainWindow::onEditorLoadTriggered()
+{
+    // Compile String
+    QByteArray editorBA = editorWindow->toPlainText().toLocal8Bit();
+    char *editorString = editorBA.data();
+    compileFromString(editorString);
+    // Write to Buffer
+    int Buffer[100] = {0};
+    instructionsToIntBuffer(Buffer);
+    int size = sizeof(Buffer) / sizeof(Buffer[0]);
+    // Update lmc
+    resetLmc();
+    lmc->setMemory(Buffer, size);
+    updateValues();
+    // clear
+    freeParser();
 }
 
 void MainWindow::onClearOutputTriggered()
@@ -389,4 +445,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
         event->accept();
     }
+}
+
+void MainWindow::resetLmc()
+{
+    lmc->reset();
+    if (settingsWindow->getIsAutoClear())
+    {
+        clearOutput();
+    }
+    updateValues();
 }

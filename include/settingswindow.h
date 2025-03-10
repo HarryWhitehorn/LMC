@@ -14,7 +14,7 @@
 
 const int MAX_DELAY = 10000;
 const int DELAY_TIME = 200;
-const int MIN_STEP = 100;
+const int MIN_STEP = 10;
 
 class SettingsWindow : public QWidget
 {
@@ -31,6 +31,7 @@ public:
     QPalette getPcHighlight();
     QPalette getArHighlight();
     bool getIsAutoClear();
+    bool getIsAutoscroll();
 
 signals:
     void clearOutput();
@@ -56,6 +57,7 @@ private:
     QLineEdit *outputAppendText;
     QCheckBox *outputClearCheckBox;
     QPushButton *outputClearButton;
+    QCheckBox *outputAutoscrollCheckBox;
     // Palette
     QColorDialog *highlightColorDialog;
     QGroupBox *paletteGroupBox;
