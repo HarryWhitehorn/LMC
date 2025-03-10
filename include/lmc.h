@@ -12,18 +12,18 @@ const std::string FILEPATH = "c:\\Users\\harry\\Documents\\GitHub\\LMC\\programs
 
 enum Opcode
 {
-    ADD = 1,   // Add
-    SUB = 2,   // Subtract
-    STA = 3,   // Store
-    LDA = 5,   // Load
-    BRA = 6,   // Branch Always
-    BRZ = 7,   // Branch if Zero
-    BRP = 8,   // Branch if positive
-    IO = 9,    // Input / Output
-    INP = 901, // Input
-    OUT = 902, // Output
-    OTC = 922, // Output Character
-    HLT = 0,   // Halt
+    OP_ADD = 1,   // Add
+    OP_SUB = 2,   // Subtract
+    OP_STA = 3,   // Store
+    OP_LDA = 5,   // Load
+    OP_BRA = 6,   // Branch Always
+    OP_BRZ = 7,   // Branch if Zero
+    OP_BRP = 8,   // Branch if positive
+    OP_IO = 9,    // Input / Output
+    OP_INP = 901, // Input
+    OP_OUT = 902, // Output
+    OP_OTC = 922, // Output Character
+    OP_HLT = 0,   // Halt
     // DAT = 999 // Data
 };
 
@@ -66,6 +66,7 @@ public:
     void main();
     void reset();
     void setMemory(std::vector<int> m);
+    void setMemory(int m[], int size);
     void printMemory();
     void save(std::string path=FILEPATH);
     void load(std::string path=FILEPATH);

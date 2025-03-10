@@ -15,11 +15,17 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QDesktopServices>
 #include <array>
 #include "lmc.h"
 #include "abstractio.h"
+#include "editorWindow.h"
 #include "settingswindow.h"
 #include "aboutwindow.h"
+extern "C" {
+    #include "compile.h"
+}
+
 
 class MainWindow : public QMainWindow, InputDevice, OutputDevice
 {
@@ -54,7 +60,7 @@ public:
         // FileMenu
     QMenu *fileMenu;
     QAction *openAction;
-    QAction *saveAction;
+    // QAction *saveAction;
     QAction *exitAction; 
         // ControlMenu
     QMenu *controlMenu;
@@ -62,10 +68,17 @@ public:
     QAction *stopAction;
     QAction *stepAction;
     QAction *resetAction;
-        // HelpMenu
-    QMenu *helpMenu;
+        // EditorMenu
+    QMenu *editorMenu;
+    QAction *editorAction;
+    EditorWindow *editorWindow;
+        // SettingsMenu
+    QMenu *settingsMenu;
     QAction *settingsAction;
     SettingsWindow *settingsWindow;
+        // HelpMenu
+    QMenu *helpMenu;
+    QAction *docsAction;
     QAction *aboutAction;
     AboutWindow *aboutWindow;
 
@@ -91,6 +104,7 @@ public:
     void delay(int msecs=DELAY_TIME);
 
 private slots:
+    void onEditorTriggered();
     void onOpenTriggered();
     void onSaveTriggered();
     void onExitTriggered();
@@ -100,8 +114,11 @@ private slots:
     void onResetTriggered();
     void onEnterClicked();
     void onSettingsTriggered();
+    void onDocsTriggered();
     void onAboutTriggered();
-    //
+    // Editor Window
+    void onEditorLoadTriggered();
+    // Settings Window
     void onClearOutputTriggered();
     // Misc
     void closeEvent(QCloseEvent *event) override;
@@ -114,5 +131,6 @@ private:
     void setupOutput();
     void setupMenu();
     void clearOutput();
+    void resetLmc();
 };
 #endif // MAINWINDOW_H

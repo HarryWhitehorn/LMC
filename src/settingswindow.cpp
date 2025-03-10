@@ -70,6 +70,11 @@ void SettingsWindow::setupOutput()
     outputClearButton->setToolTip("Clear output text now.");
     connect(outputClearButton, &QPushButton::pressed, this, &SettingsWindow::onOutputClearButtonPressed);
     outputGrid->addWidget(outputClearButton, 1, 1, 1, 1);
+    // Autoscroll
+    outputAutoscrollCheckBox = new QCheckBox("Autoscroll", this);
+    outputAutoscrollCheckBox->setChecked(true);
+    outputAutoscrollCheckBox->setToolTip("Automatically scroll output view on new append.");
+    outputGrid->addWidget(outputAutoscrollCheckBox, 2, 0, 1, 1);
     //
     outputGroupBox->setLayout(outputGrid);
     mainGrid->addWidget(outputGroupBox, 0, 1, 1, 1);
@@ -153,6 +158,11 @@ QPalette SettingsWindow::getArHighlight()
 bool SettingsWindow::getIsAutoClear()
 {
     return outputClearCheckBox->isChecked();
+}
+
+bool SettingsWindow::getIsAutoscroll()
+{
+    return outputAutoscrollCheckBox->isChecked();
 }
 
 void SettingsWindow::onOutputAppendCheckBoxChanged(int state)

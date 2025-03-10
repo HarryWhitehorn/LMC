@@ -99,37 +99,37 @@ void Lmc::execute()
 {
     switch (ir)
     {
-    case ADD:
+    case OP_ADD:
         add();
         break;
-    case SUB:
+    case OP_SUB:
         sub();
         break;
-    case STA:
+    case OP_STA:
         sta();
         break;
-    case LDA:
+    case OP_LDA:
         lda();
         break;
-    case BRA:
+    case OP_BRA:
         bra();
         break;
-    case BRZ:
+    case OP_BRZ:
         brz();
         break;
-    case BRP:
+    case OP_BRP:
         brp();
         break;
-    case IO:
+    case OP_IO:
         switch (ir * 100 + ar)
         {
-        case INP:
+        case OP_INP:
             inp();
             break;
-        case OUT:
+        case OP_OUT:
             out();
             break;
-        case OTC:
+        case OP_OTC:
             otc();
             break;
         default:
@@ -137,7 +137,7 @@ void Lmc::execute()
             break;
         }
         break;
-    case HLT:
+    case OP_HLT:
         hlt();
         break;
     default:
@@ -185,6 +185,14 @@ std::array<int, 100> Lmc::getMemory()
 void Lmc::setMemory(std::vector<int> m)
 {
     for (int i = 0; i < size(m); ++i)
+    {
+        memory[i] = m[i];
+    }
+}
+
+void Lmc::setMemory(int m[], int size)
+{
+    for (int i = 0; i < size; i++)
     {
         memory[i] = m[i];
     }
@@ -290,29 +298,3 @@ void Lmc::setOuput(OutputDevice *output)
 {
     outputDevice = output;
 }
-
-// TODO
-// - Compile from Assembly to dec.2
-// - Add saving to file
-// - Create UI using qt.
-// - Comment
-// - readme.md
-// - publish
-
-// int main()
-// {
-//     // cout << "START" << endl;
-//     InputDevice *in = new ConsoleInput();
-//     OutputDevice *out = new ConsoleOutput();
-//     Lmc l(in, out);
-//     l.isDebug = true; // TODO
-//     // l._setMemory();
-//     // l.printMemory();
-//     // l.save();
-//     l.load();
-//     l.printStatus();
-//     l.main();
-//     // cout << zfill(21) << endl;
-//     // cout << "END" << endl;
-//     return 0;
-// };
