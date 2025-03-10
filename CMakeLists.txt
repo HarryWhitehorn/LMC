@@ -27,10 +27,14 @@ set(HEADERS
     include/lmcHighlighter.h
 )
 
+# https://stackoverflow.com/a/78252911
+set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/res/favicon/favicon.rc")
+
 qt_add_executable(lmc
     WIN32 MACOSX_BUNDLE
     ${SOURCES}
     ${HEADERS}
+    ${app_icon_resource_windows}
 )
 
 target_link_libraries(lmc
