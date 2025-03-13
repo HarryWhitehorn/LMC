@@ -1,8 +1,18 @@
 # LMC
 
-[LMC Wiki](https://en.wikipedia.org/wiki/Little_man_computer)
+An emulator for the [Little Man Computer](https://en.wikipedia.org/wiki/Little_man_computer).
 
-Example programs can be found in /programs.
+Example programs can be found in `/programs`.
+
+![ascii demo](res/media/ascii_demo.gif)
+
+## Build Requirements
+
+- [lmc-compiler](https://www.github.com/HarryWhitehorn/lmc-compiler)
+    - [Bison](https://www.gnu.org/software/bison/) [3.0]
+    - [Flex](https://www.gnu.org/software/flex/) [2.6]
+    - [Gengetopts](https://www.gnu.org/software/gengetopt/gengetopt.html#Installation) [2.23] (cli only)
+- QT 6.5
 
 ## Menus
 
@@ -54,7 +64,7 @@ Example programs can be found in /programs.
 - Delay
     - Change delay timing (0ms for no delay) [`default: 200ms`]
 - Output
-    - Toggle auto-append char(s) to end of output w/ char(s) input (`\n` for newline) [`default: true && '\n'`]
+    - Toggle auto-append char(s) to end of output w/ char(s) input (`'\n'` for newline) [`default: true && '\n'`]
     - Toggle auto-clear on reload/load [`default: false`]
     - Clear output now
     - Toggle autoscroll [`default: true`]
@@ -62,4 +72,14 @@ Example programs can be found in /programs.
     - Toggle PC Highlight w/ color select [`default: true && red`]
     - Toggle AR Highlight w/ color select [`default: true && green`]
 
+## TODO
 
+- Improve/polish UI
+    - Limit output size and priorities memory size on fullscreen
+- Add live memory edit
+- Rewrite using QML
+
+### Bugs
+
+- Stopping a running program will prevent the user from stepping through.
+- Changing color in setting will not be reflected until lmc is stepped.
